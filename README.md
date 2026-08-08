@@ -14,9 +14,9 @@ MIXUP AI HACKATHON 2026 3rd Track 2
 
 문제 주제 및 데이터 설명
 -------
-문제 주제: 분자 구조 기반 hERG inhibition at 1µM 회귀 예측 AI 모델 개발
+**문제 주제: 분자 구조 기반 hERG inhibition at 1µM 회귀 예측 AI 모델 개발**
 
-데이터 설명
+**데이터 설명**
 
 본 대회에서는 각 화합물의 분자 구조를 나타내는 **SMILES**와,
 SMILES로부터 추출한 여러 형태의 분자 feature가 제공됩니다.
