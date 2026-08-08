@@ -10,7 +10,7 @@ MIXUP AI HACKATHON 2026 3rd Track 2
 - 대회 일정:2026.05.22(금) 20:00~ 2026.05.23(토) 13:00
 - 주최 동아리:BITAmin, Prometheus, TOBIG's
 - 주관: Upstage, KRIBB
-- 대회 링크:https://dacon.io/competitions/official/236720/overview/description
+- 대회 링크:https://dacon.io/competitions/official/236720/overview/description (track 2)
 - 문제 유형
   - track 1: [업스테이지]SOLAR PRO3를 활용한 Agent 개발
   - track 2: [한국생명공학연구원]분자 구조 기반 hERG inhibition 회귀 예측 모델 개발
@@ -79,69 +79,183 @@ MAE는 실제값과 예측값 사이의 절대 오차 평균이고, 값이 낮�
 | `test/test_chemberta_feature.csv` | 기본 변수 + ChemBERTa Embedding 768차원 |
 | `test/test_all_feature.csv` | Descriptor + Fingerprint + ChemBERTa를 모두 결합한 데이터 |
 
-
 ### 분자 표현 Feature
 
 하나의 화합물을 서로 다른 방식으로 표현한 세 종류의 feature가 제공됩니다.
 
 #### 1. RDKit Descriptor
 
-SMILES로부터 계산한 **분자의 물리·화학적 및 구조적 특성**입니다.
+SMILES로부터 계산한 분자의 물리·화학적 및 구조적 특성임.
 
-총 **210개의 feature**가 제공되며, 대표적으로 다음과 같은 정보를 포함합니다.
+총 210개의 feature가 제공되며, 대표적으로 다음과 같은 정보가 있음.
 
-- 분자량(Molecular Weight)
+- 분자량 (Molecular Weight)
 - LogP
 - TPSA
 - 수소결합 Donor / Acceptor
 - Rotatable Bond
 - Ring 관련 특성
 
-즉, Descriptor는
-
-> **"이 분자가 어떤 물리·화학적 특성을 가지고 있는가?"**
-
-를 수치로 표현한 데이터입니다.
-
 #### 2. Morgan Fingerprint
 
-분자 내부의 **국소적인 구조 및 부분구조 패턴**을 벡터 형태로 표현한 데이터입니다.
+분자 내부의 국소적인 구조 및 부분구조 정보를 고정 길이의 이진 벡터로 표현한 데이터입니다.
 
 - Radius: 2
-- Dimension: **2,048**
-- 값: **0 / 1**
+- Dimension:2,048
 
-예를 들어 특정 원자 주변에 특정 구조 패턴이 존재하는지를 고정된 길이의 벡터로 표현합니다.
-
-즉, Fingerprint는
-
-> **"이 분자가 어떤 구조적 패턴을 가지고 있는가?"**
-
-를 표현하는 데이터입니다.
+원자 주변의 부분구조 정보를 해시하여 각 fingerprint bit의 활성 여부로 표현함.
 
 #### 3. ChemBERTa Feature
 
-SMILES 문자열을 분자 데이터로 사전학습된 Transformer 모델인
-**ChemBERTa**를 이용해 숫자 벡터로 변환한 데이터입니다.
+대회에서 제공된 seyonec/ChemBERTa-zinc-base-v1 기반의 SMILES embedding으로, 총 768차원의 연속형 feature로 구성되어 있음.
 
 - Dimension: **768**
 
-Descriptor처럼 각 feature가 '분자량', '극성'처럼 사람이 정의한 의미를 가지는 것은 아니며,
-Transformer가 SMILES에서 학습한 **잠재 표현(Latent Representation)** 입니다.
 
-즉,
+데이터 분석
+-------
+## 주요 점검 항목 및 EDA
 
-> **"SMILES에 포함된 복잡한 분자 구조 정보를 모델이 학습한 표현"**
+모델링에 앞서 기본적인 탐색적 데이터 분석(EDA)을 수행했습니다.
 
-이라고 볼 수 있습니다.
+**주요점검항목**
 
-### 전체 Feature 구성
+| 점검 항목 | 확인 목적 |
+|---|---|
+| **Target 분포** | 치우침, 음수값, 극단값 등 회귀 문제의 특성 파악 |
+| **결측치 / 무한값** | 전처리가 필요한 비정상 값 존재 여부 확인 |
+| **중복 데이터** | 동일 화합물 또는 중복 행으로 인한 데이터 누수 가능성 확인 |
+| **상수 / Near-constant 변수** | 정보량이 거의 없는 feature 확인 |
+| **Feature scale / 이상값** | 비정상적으로 큰 값이나 심한 왜도를 가진 변수 확인 |
+| **Fingerprint 희소성** | 2,048차원 이진 feature의 실제 활성화 정도 확인 |
+| **Train / Test 분포 차이** | 학습 데이터와 평가 데이터 간 distribution shift 가능성 확인 |
+| **SMILES 길이** | 비정상적으로 길거나 특이한 분자 표현 존재 여부 확인 |
 
-| Feature 종류 | 차원 |
+### 결측값 및 데이터 품질
+
+- **결측치: 0개**
+- **`+inf`, `-inf`: 0개**
+- **중복 `id`: 0개**
+- **중복 `smiles`: 0개**
+- **완전히 동일한 행: 0개**
+
+### Target 분포 및 이상치
+
+| 지표 | 값 |
 |---|---:|
-| RDKit Descriptor | 210 |
-| Morgan Fingerprint | 2,048 |
-| ChemBERTa Embedding | 768 |
-| **전체** | **3,026** |
+| 평균 | 2.3985 |
+| 중앙값 | 6.8613 |
+| 표준편차 | 17.0614 |
+| 최솟값 | -118.7569 |
+| 최댓값 | 126.4892 |
+| 음수 비율 | 29.24% |
+| `|y| > 60` 비율 | 1.81% |
+| IQR 기준 Outlier 비율 | 8.47% |
+| 왜도 | -2.3810 |
 
-`all_feature` 데이터는 위 세 가지 feature를 하나로 결합한 데이터입니다.
+Target의 약 **29%가 음수**였으며,
+평균보다 중앙값이 높고 왜도가 음수로 나타나
+**음수 방향으로 긴 꼬리를 가진 좌편향 분포**임을 확인하였음.
+
+### RDKit Descriptor 점검
+
+총 210개의 RDKit Descriptor 중 일부는 데이터 내 변화가 거의 없는 변수였습니다.
+
+- **상수 변수:** 7개
+- **Near-constant 변수:** 21개
+- **고유값이 5개 이하인 변수:** 68개
+
+예를 들어 `NumRadicalElectrons`, `SMR_VSA8`, `SlogP_VSA9` 등은
+Train 데이터에서 값의 변화가 없는 상수 변수로 확인되었음.
+
+### Descriptor와 Target의 관계
+
+각 RDKit Descriptor와 `hERG_inhibition` 사이의
+Pearson 및 Spearman 상관관계를 확인했습니다.
+
+Pearson 절댓값 기준 상위 변수는 다음과 같았습니다.
+
+| Descriptor | Pearson r |
+|---|---:|
+| `EState_VSA4` | -0.2125 |
+| `PEOE_VSA8` | -0.2102 |
+| `Chi3n` | -0.2088 |
+| `Chi1n` | -0.2076 |
+| `Chi4n` | -0.1975 |
+
+가장 높은 절대 상관도 약 0.21 수준으로,
+**단일 Descriptor 하나만으로 Target을 충분히 설명하기는 어렵다**고 판단하였음.
+
+따라서 개별 변수의 선형 관계보다는 여러 분자 특성 간의 비선형 상호작용과 구조 정보를 함께 학습할 수 있는 모델을 사용하는 것이 중요하다고 판단했음.
+
+### Morgan Fingerprint 희소성
+
+2,048차원의 Morgan Fingerprint는 대부분의 bit가 0인
+매우 희소한(sparse) 데이터였음.
+
+- Train 전체 bit 중 `1`: **2.25%**
+- Test 전체 bit 중 `1`: **2.24%**
+- 화합물당 평균 활성 bit: **약 46개**
+- 화합물당 중앙 활성 bit: **46개**
+
+즉 하나의 화합물에서는 평균적으로 `2,048개 중 약 46개의 bit만 활성화`되어 있었음.
+
+### ChemBERTa Feature 점검
+
+ChemBERTa Embedding 768개 차원은 모두 연속형 값으로 구성되어 있었으며,
+
+- 상수 dimension: **0개**
+- Near-constant dimension: **0개**
+
+로 확인되었음.
+
+### Train / Test 분포 점검
+
+학습 데이터의 패턴이 Test에도 동일하게 적용될 수 있는지 확인하기 위해
+Train과 Test의 feature 분포를 비교했습니다.
+
+개별 feature의 표준화 평균차(SMD)를 확인한 결과,
+
+- RDKit Descriptor 최대 `|SMD|`: 약 **0.055**
+- Morgan Fingerprint 최대 `|SMD|`: 약 **0.068**
+- ChemBERTa 최대 `|SMD|`: 약 **0.068**
+
+로 나타났습니다.
+
+단일 feature 기준으로 매우 큰 분포 차이는 확인되지 않았지만,
+일부 변수에서는 상대적으로 Train/Test 차이가 존재했습니다.
+
+RDKit Descriptor 중 차이가 상대적으로 크게 나타난 변수는
+
+- `SMR_VSA4`
+- `NumAromaticRings`
+- `SlogP_VSA8`
+- `PEOE_VSA14`
+
+등이었습니다.
+
+따라서 단순 Train 성능만 확인하지 않고,
+교차검증을 통해 일반화 성능을 평가하는 것이 중요하다고 판단했음.
+
+###  EDA를 통해 얻은 주요 시사점
+
+1. **결측치와 중복 문제는 크지 않았다.**
+   - 데이터 정제보다 feature 특성과 Target 분포를 이해하는 것이 더 중요했습니다.
+
+2. **Target은 일반적인 0~100 범위의 단순 비율 데이터가 아니었다.**
+   - 음수값과 100을 초과하는 값이 실제로 존재함. 음수도 의미있는 값일 수 있음.
+
+3. **일부 RDKit Descriptor는 정보량이 매우 적었다.**
+   - 상수 및 near-constant 변수가 존재해 feature selection 가능성을 확인했음.
+
+4. **단일 Descriptor와 Target의 관계는 강하지 않았다.**
+   - 개별 feature보다는 여러 분자 특성의 비선형 관계를 학습할 필요가 있었음.
+
+5. **Morgan Fingerprint는 매우 희소한 고차원 데이터였다.**
+   - Descriptor와는 다른 형태의 구조 정보를 제공하므로 별도의 모델 또는 ensemble 구성에 활용할 가치가 있었음.
+
+6. **ChemBERTa는 768차원 전체에서 유효한 변화가 존재했다.**
+   - 사람이 직접 해석하기 어려운 대신 SMILES의 복잡한 구조 정보를 다른 방식으로 표현하는 feature로 활용할 수 있었음.
+
+7. **Train/Test의 개별 feature 분포는 전반적으로 유사했지만 일부 차이가 존재했다.**
+   - 따라서 단순 학습 성능보다는 CV 및 OOF 기반 일반화 성능 확인이 중요했음.
