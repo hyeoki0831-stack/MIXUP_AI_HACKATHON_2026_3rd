@@ -3,3 +3,4 @@ MIXUP AI HACKATHON 2026 3rd Track 2
 
 #대회 개요
 
+-----
