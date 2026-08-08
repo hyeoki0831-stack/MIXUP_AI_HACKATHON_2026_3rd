@@ -9,5 +9,5 @@ MIXUP AI HACKATHON 2026 3rd Track 2
 - 주관: Upstage, KRIBB
 - 대회 링크:https://dacon.io/competitions/official/236720/overview/description
 - 문제 유형
-  - track 1:[업스테이지]SOLAR PRO3를 활용한 Agent 개발
-  - track 2:[한국생명공학연구원]분자 구조 기반 hERG inhibition 회귀 예측 모델 개발
+  - track 1: [업스테이지]SOLAR PRO3를 활용한 Agent 개발
+  - track 2: [한국생명공학연구원]분자 구조 기반 hERG inhibition 회귀 예측 모델 개발
