@@ -1,2 +1,5 @@
 # MIXUP_AI_HACKATHON_2026_3rd
 MIXUP AI HACKATHON 2026 3rd Track 2
+
+#대회 개요
+
