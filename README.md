@@ -1,6 +1,9 @@
 # MIXUP_AI_HACKATHON_2026_3rd
 MIXUP AI HACKATHON 2026 3rd Track 2
 
+2026년 5월에 참여한 "MIXUP AI HACKATHON 2026 3rd Track 2" 대회 정리 및 기록 문서입니다.
+3명의 팀원을 포함한 하나의 팀으로 대회에 참가하였습니다.
+
 대회 개요
 --------------------
 - 대회 명:MIXUP AI HACKATHON 2026 3rd track2
@@ -16,33 +19,66 @@ MIXUP AI HACKATHON 2026 3rd Track 2
 -------
 **문제 주제: 분자 구조 기반 hERG inhibition at 1µM 회귀 예측 AI 모델 개발**
 
+- **평가 지표:** MAE (Mean Absolute Error)
+MAE는 실제값과 예측값 사이의 절대 오차 평균이고, 값이 낮을수록 좋은 성능을 의미함.
+
 **데이터 설명**
 
-본 대회에서는 각 화합물의 분자 구조를 나타내는 **SMILES**와,
-SMILES로부터 추출한 여러 형태의 분자 feature가 제공됩니다.
+각 화합물은 기본적인 `SMILES` 정보와 함께,
+분자 구조를 서로 다른 방식으로 표현한 세 종류의 feature로 제공됩니다.
 
 - **Train:** 39,994개 화합물
 - **Test:** 9,998개 화합물
 - **Target:** `hERG_inhibition`
 - `hERG_inhibition`은 **1µM 농도에서 측정된 hERG percent inhibition 값**입니다.
 
-Train 데이터에는 정답인 `hERG_inhibition`이 포함되어 있으며,
-Test 데이터에는 정답이 제공되지 않습니다.
+| Feature 종류 | 차원 | 설명 |
+|---|---:|---|
+| **RDKit Descriptor** | 210 | 분자의 물리화학적·구조적 특성을 수치화한 변수 |
+| **Morgan Fingerprint** | 2,048 | 분자의 국소적인 부분구조 패턴을 0/1 bit로 표현 |
+| **ChemBERTa Embedding** | 768 | SMILES를 Transformer가 학습하여 생성한 잠재 표현 |
+| **전체 Feature** | **3,026** | 위 세 종류의 feature를 모두 결합 |
+
 
 ### 주요 변수 설명
 
 | 변수 그룹 | 주요 변수명 | 설명 |
 |---|---|---|
 | **식별자** | `id` | 각 화합물 샘플을 구분하기 위한 고유 ID |
-| **분자 구조** | `smiles` | 원자와 결합으로 이루어진 화합물의 분자 구조를 문자열 형태로 표현 |
-| **타깃 변수** | `hERG_inhibition` | 1µM 농도에서 측정된 hERG 채널 억제율로, 모델이 예측해야 하는 연속형 변수 |
-| **전자적 특성·표면적** | `EState_VSA4`, `PEOE_VSA8`, `EState_VSA8` 등 | 원자의 전자적 상태 또는 부분전하와 분자 표면적 정보를 함께 나타내는 RDKit Descriptor |
-| **분자 연결성** | `Chi1n`, `Chi2n`, `Chi3n`, `Chi4n` 등 | 분자 내 원자들의 연결 관계와 구조적 복잡성을 수치화한 Descriptor |
-| **분자 구조·형태** | `BalabanJ`, `Kappa2` 등 | 분자의 위상 구조와 형태적 복잡성을 나타내는 Descriptor |
-| **물리화학적 특성** | `MolMR`, `SMR_VSA6`, `SlogP_VSA8` 등 | 분자의 굴절률, 지용성 및 이와 관련된 표면적 특성을 나타내는 변수 |
-| **방향족 구조** | `NumAromaticRings`, `NumAromaticHeterocycles` 등 | 분자 내 방향족 고리와 방향족 헤테로고리의 개수를 나타내는 구조 변수 |
-| **부분구조 패턴** | Morgan Fingerprint 2,048 bit | 원자 주변의 국소적인 분자 구조 패턴을 0/1 형태의 고차원 벡터로 표현 |
-| **SMILES 잠재 표현** | ChemBERTa Embedding 768차원 | Transformer가 SMILES 문자열에서 학습한 분자의 고차원 잠재 표현 |
+| **분자 구조** | `smiles` | 화합물의 분자 구조를 문자열 형태로 표현한 SMILES |
+| **타깃 변수** | `hERG_inhibition` | 1 µM 농도에서 측정된 hERG percent inhibition 값 |
+| **분자 크기·질량** | `MolWt`, `ExactMolWt`, `HeavyAtomCount` | 분자의 질량과 크기를 나타내는 특성 |
+| **지용성·극성** | `MolLogP`, `TPSA` | 분자의 지용성과 극성에 관련된 물리화학적 특성 |
+| **수소결합 특성** | `NumHDonors`, `NumHAcceptors` | 수소결합 공여체와 수용체의 수 |
+| **구조적 유연성** | `NumRotatableBonds`, `FractionCSP3` | 분자의 회전 가능한 결합 및 3차원적 구조 특성 |
+| **고리 구조** | `RingCount`, `NumAromaticRings` | 분자 내 고리 및 방향족 고리의 수 |
+| **표면·전자적 특성** | `PEOE_VSA*`, `SlogP_VSA*`, `EState_VSA*` | 부분전하, 지용성, 전자적 상태와 표면적을 결합한 Descriptor |
+| **부분구조** | `fr_*` | 특정 작용기 또는 부분구조의 개수를 나타내는 Descriptor |
+| **구조 패턴** | `morgan_r2_bit_0` ~ `morgan_r2_bit_2047` | Radius 2 Morgan fingerprint의 2,048차원 이진 feature |
+| **잠재 분자 표현** | `chemberta_0` ~ `chemberta_767` | ChemBERTa가 SMILES로부터 학습한 768차원 latent embedding |
+
+### 데이터 파일
+
+#### Train
+
+| 파일 | 포함 정보 |
+|---|---|
+| `train/train.csv` | `id`, `smiles`, `hERG_inhibition` |
+| `train/train_rdkit_descriptor.csv` | 기본 변수 + RDKit Descriptor 210개 |
+| `train/train_rdkit_fingerprint.csv` | 기본 변수 + Morgan Fingerprint 2,048 bit |
+| `train/train_chemberta_feature.csv` | 기본 변수 + ChemBERTa Embedding 768차원 |
+| `train/train_all_features.csv` | Descriptor + Fingerprint + ChemBERTa를 모두 결합한 데이터 |
+
+#### Test
+
+| 파일 | 포함 정보 |
+|---|---|
+| `test/test.csv` | `id`, `smiles` |
+| `test/test_rdkit_descriptor.csv` | 기본 변수 + RDKit Descriptor 210개 |
+| `test/test_rdkit_fingerprint.csv` | 기본 변수 + Morgan Fingerprint 2,048 bit |
+| `test/test_chemberta_feature.csv` | 기본 변수 + ChemBERTa Embedding 768차원 |
+| `test/test_all_feature.csv` | Descriptor + Fingerprint + ChemBERTa를 모두 결합한 데이터 |
+
 
 ### 분자 표현 Feature
 
