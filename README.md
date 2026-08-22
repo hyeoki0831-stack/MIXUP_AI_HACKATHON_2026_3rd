@@ -1,8 +1,8 @@
 # MIXUP_AI_HACKATHON_2026_3rd
 MIXUP AI HACKATHON 2026 3rd Track 2
 
-2026년 5월에 참여한 "MIXUP AI HACKATHON 2026 3rd Track 2" 대회 정리 및 기록 문서입니다.
-3명의 팀원을 포함한 하나의 팀으로 대회에 참가하였습니다.
+2026년 5월에 참여한 "MIXUP AI HACKATHON 2026 3rd Track 2" 대회 정리 및 기록 문서임.
+3명의 팀원을 포함한 하나의 팀으로 대회에 참가하였음.
 
 대회 개요
 --------------------
@@ -25,12 +25,12 @@ MAE는 실제값과 예측값 사이의 절대 오차 평균이고, 값이 낮�
 **데이터 설명**
 
 각 화합물은 기본적인 `SMILES` 정보와 함께,
-분자 구조를 서로 다른 방식으로 표현한 세 종류의 feature로 제공됩니다.
+분자 구조를 서로 다른 방식으로 표현한 세 종류의 feature로 제공됨.
 
 - **Train:** 39,994개 화합물
 - **Test:** 9,998개 화합물
 - **Target:** `hERG_inhibition`
-- `hERG_inhibition`은 **1µM 농도에서 측정된 hERG percent inhibition 값**입니다.
+- `hERG_inhibition`은 **1µM 농도에서 측정된 hERG percent inhibition 값**임.
 
 | Feature 종류 | 차원 | 설명 |
 |---|---:|---|
@@ -81,7 +81,7 @@ MAE는 실제값과 예측값 사이의 절대 오차 평균이고, 값이 낮�
 
 ### 분자 표현 Feature
 
-하나의 화합물을 서로 다른 방식으로 표현한 세 종류의 feature가 제공됩니다.
+하나의 화합물을 서로 다른 방식으로 표현한 세 종류의 feature가 제공됨.
 
 #### 1. RDKit Descriptor
 
@@ -98,7 +98,7 @@ SMILES로부터 계산한 분자의 물리·화학적 및 구조적 특성임.
 
 #### 2. Morgan Fingerprint
 
-분자 내부의 국소적인 구조 및 부분구조 정보를 고정 길이의 이진 벡터로 표현한 데이터입니다.
+분자 내부의 국소적인 구조 및 부분구조 정보를 고정 길이의 이진 벡터로 표현한 데이터임.
 
 - Radius: 2
 - Dimension:2,048
@@ -117,7 +117,7 @@ SMILES로부터 계산한 분자의 물리·화학적 및 구조적 특성임.
 ## 주요 점검 항목 및 EDA
 
 대회 종료 후 프로젝트를 정리하는 과정에서 원본 데이터를 다시 점검하고,
-추가적인 탐색적 데이터 분석(EDA)을 수행했습니다.
+추가적인 탐색적 데이터 분석(EDA)을 수행했음.
 
 **주요점검항목**
 
@@ -159,7 +159,7 @@ Target의 약 **29%가 음수**였으며,
 
 ### RDKit Descriptor 점검
 
-총 210개의 RDKit Descriptor 중 일부는 데이터 내 변화가 거의 없는 변수였습니다.
+총 210개의 RDKit Descriptor 중 일부는 데이터 내 변화가 거의 없는 변수였음.
 
 - **상수 변수:** 7개
 - **Near-constant 변수:** 21개
@@ -171,9 +171,9 @@ Train 데이터에서 값의 변화가 없는 상수 변수로 확인되었음.
 ### Descriptor와 Target의 관계
 
 각 RDKit Descriptor와 `hERG_inhibition` 사이의
-Pearson 및 Spearman 상관관계를 확인했습니다.
+Pearson 및 Spearman 상관관계를 확인했음.
 
-Pearson 절댓값 기준 상위 변수는 다음과 같았습니다.
+Pearson 절댓값 기준 상위 변수는 다음과 같았음.
 
 | Descriptor | Pearson r |
 |---|---:|
@@ -186,7 +186,7 @@ Pearson 절댓값 기준 상위 변수는 다음과 같았습니다.
 가장 높은 절대 상관도 약 0.21 수준으로,
 단일 Descriptor의 선형 관계만으로 Target을 설명하는 데에는 한계가 있음을 확인했음.
 
-이는 여러 분자 특성을 함께 고려하는 모델링이 필요할 가능성을 보여준다.
+이는 여러 분자 특성을 함께 고려하는 모델링이 필요할 가능성을 보여줌.
 
 ### Morgan Fingerprint 희소성
 
@@ -212,7 +212,7 @@ ChemBERTa Embedding 768개 차원은 모두 연속형 값으로 구성되어 있
 ### Train / Test 분포 점검
 
 학습 데이터의 패턴이 Test에도 동일하게 적용될 수 있는지 확인하기 위해
-Train과 Test의 feature 분포를 비교했습니다.
+Train과 Test의 feature 분포를 비교했음.
 
 개별 feature의 표준화 평균차(SMD)를 확인한 결과,
 
@@ -223,7 +223,7 @@ Train과 Test의 feature 분포를 비교했습니다.
 로 나타났습니다.
 
 단일 feature 기준으로 매우 큰 분포 차이는 확인되지 않았지만,
-일부 변수에서는 상대적으로 Train/Test 차이가 존재했습니다.
+일부 변수에서는 상대적으로 Train/Test 차이가 존재했음.
 
 RDKit Descriptor 중 차이가 상대적으로 크게 나타난 변수는
 
@@ -240,7 +240,7 @@ RDKit Descriptor 중 차이가 상대적으로 크게 나타난 변수는
 ###  EDA를 통해 얻은 주요 시사점
 
 1. **결측치와 중복 문제는 크지 않았다.**
-   - 데이터 정제보다 feature 특성과 Target 분포를 이해하는 것이 더 중요했습니다.
+   - 데이터 정제보다 feature 특성과 Target 분포를 이해하는 것이 더 중요했음.
 
 2. **Target은 일반적인 0~100 범위의 단순 비율 데이터가 아니었다.**
    - 음수값과 100을 초과하는 값이 실제로 존재함. 음수도 의미있는 값일 수 있음.
@@ -253,16 +253,16 @@ RDKit Descriptor 중 차이가 상대적으로 크게 나타난 변수는
 
 5. **Morgan Fingerprint는 매우 희소한 고차원 데이터였다.**
 
-   - Descriptor와 다른 형태로 분자의 부분구조 정보를 표현한다는 특징을 확인했습니다.
+   - Descriptor와 다른 형태로 분자의 부분구조 정보를 표현한다는 특징을 확인했음.
 
 6. **ChemBERTa Embedding은 768개 차원 모두에서 변동성이 존재했다.**
    - 사람이 직접 의미를 해석하기 어려운 latent representation이지만,
-     Descriptor나 Fingerprint와는 다른 방식으로 SMILES 정보를 표현합니다.
+     Descriptor나 Fingerprint와는 다른 방식으로 SMILES 정보를 표현함.
 
 7. **Train/Test의 단변량 Feature 분포에서 큰 차이는 확인되지 않았다.**
 
    - 다만 일부 Feature에서 상대적인 차이가 존재했으며,
-     단변량 분석만으로 전체적인 distribution shift를 판단하는 데에는 한계가 있습니다.
+     단변량 분석만으로 전체적인 distribution shift를 판단하는 데에는 한계가 있음.
 
 
 
@@ -288,16 +288,16 @@ LGBM / Huber Stacking
 ### 1. 최종 모델 구성
 
 최종 제출 모델은 여러 Base Model의 예측값을 다시 Meta Model에 입력하는
-**Stacking Ensemble** 구조로 구성했습니다.
+**Stacking Ensemble** 구조로 구성했음.
 
 최종 Meta Model의 입력에는
 
 - **10개의 Base Model prediction**
 - **10개의 물리화학적 Feature**
 
-를 사용했습니다.
+를 사용했음.
 
-전체 구조는 다음과 같습니다.
+전체 구조는 다음과 같음.
 
 ```text
 10 Base Model Predictions
@@ -321,7 +321,7 @@ OOF 8.3807         OOF 8.4379
 
 ### 2. Base Models
 
-최종 Stacking에는 총 **10개의 Base Model prediction**을 사용했습니다.
+최종 Stacking에는 총 **10개의 Base Model prediction**을 사용했음.
 
 | Base Model | OOF MAE |
 |---|---:|
@@ -338,14 +338,14 @@ OOF 8.3807         OOF 8.4379
 
 최종 Ensemble에는 Chemprop 계열, LightGBM 계열,
 Fingerprint 기반 모델, ChemBERTa 기반 모델 등
-서로 다른 형태의 Base Model prediction이 포함되었습니다.
+서로 다른 형태의 Base Model prediction이 포함되었음.
 
 ---
 
 ### 3. Meta Feature 구성
 
 10개의 Base Model prediction에
-다음 **10개의 물리화학적 Feature**를 추가하여 Meta Model의 입력으로 사용했습니다.
+다음 **10개의 물리화학적 Feature**를 추가하여 Meta Model의 입력으로 사용했음.
 
 | Feature | 의미 |
 |---|---|
@@ -360,7 +360,7 @@ Fingerprint 기반 모델, ChemBERTa 기반 모델 등
 | `fr_piperdine` | Piperidine 구조 관련 Descriptor |
 | `fr_pyridine` | Pyridine 구조 관련 Descriptor |
 
-따라서 최종 Meta Model은 총 **20개의 입력 Feature**를 사용했습니다.
+따라서 최종 Meta Model은 총 **20개의 입력 Feature**를 사용했음.
 
 ```text
 10 Base Predictions
@@ -374,10 +374,10 @@ Fingerprint 기반 모델, ChemBERTa 기반 모델 등
 
 ### 4. LGBM Meta Learner
 
-첫 번째 Meta Model로 **LightGBM의 L1 Regression**을 사용했습니다.
+첫 번째 Meta Model로 **LightGBM의 L1 Regression**을 사용했음.
 
 10개의 Base prediction과 10개의 물리화학적 Feature를 입력으로 받아
-최종 Target을 예측하도록 학습했습니다.
+최종 Target을 예측하도록 학습했음.
 
 **OOF MAE: 8.3807**
 
@@ -385,14 +385,14 @@ Fingerprint 기반 모델, ChemBERTa 기반 모델 등
 
 ### 5. Huber Meta Learner
 
-두 번째 Meta Model로 **Huber Regression**을 사용했습니다.
+두 번째 Meta Model로 **Huber Regression**을 사용했음.
 
 LGBM Meta Model과 동일하게
 
 - 10개 Base Model prediction
 - 10개 물리화학적 Feature
 
-를 입력으로 사용했습니다.
+를 입력으로 사용했음.
 
 **OOF MAE: 8.4379**
 
@@ -400,7 +400,7 @@ LGBM Meta Model과 동일하게
 
 ### 6. Final Blend
 
-두 Meta Model의 prediction을 최종적으로 다시 결합했습니다.
+두 Meta Model의 prediction을 최종적으로 다시 결합했음.
 
 **Final Prediction = 0.7 × LGBM + 0.3 × Huber**
 
@@ -409,7 +409,7 @@ LGBM Meta Model과 동일하게
 - **LGBM Meta Learner: 70%**
 - **Huber Regression: 30%**
 
-의 비율로 Ensemble했습니다.
+의 비율로 Ensemble했음.
 
 | Model | OOF MAE |
 |---|---:|
@@ -417,7 +417,7 @@ LGBM Meta Model과 동일하게
 | Huber Regression | 8.4379 |
 | **Final Blend** | **8.3773** |
 
-최종 Leaderboard MAE는 **8.5201**을 기록했습니다.
+최종 Leaderboard MAE는 **8.5201**을 기록했음.
 
 > **Final OOF MAE: 8.3773**  
 > **Final Leaderboard MAE: 8.5201**
@@ -426,15 +426,60 @@ LGBM Meta Model과 동일하게
 ## 💡 주요 시사점
 
 - **단일 모델보다 Stacking Ensemble에서 더 높은 성능을 확인했습니다.**  
-  가장 좋은 Base Model인 `chemprop_bag_all`의 OOF MAE는 8.6065였지만, 여러 Base Model의 예측값을 결합한 최종 Stacking Ensemble은 **OOF MAE 8.3773**까지 개선되었습니다.
+  가장 좋은 Base Model인 `chemprop_bag_all`의 OOF MAE는 8.6065였지만, 여러 Base Model의 예측값을 결합한 최종 Stacking Ensemble은 **OOF MAE 8.3773**까지 개선되었음.
 
 - **서로 다른 분자 표현을 사용하는 모델의 예측값을 하나의 Meta Model에서 결합할 수 있었습니다.**  
-  최종 모델에는 Chemprop, LightGBM, Morgan Fingerprint, ChemBERTa 등 서로 다른 입력 표현과 모델 구조에서 생성된 예측값이 함께 사용되었습니다.
+  최종 모델에는 Chemprop, LightGBM, Morgan Fingerprint, ChemBERTa 등 서로 다른 입력 표현과 모델 구조에서 생성된 예측값이 함께 사용되었음.
 
 - **Base Model의 prediction뿐 아니라 물리화학적 특성을 Meta Feature로 함께 사용하는 구조가 활용되었습니다.**  
-  10개의 Base Model prediction에 LogP, MolWt, TPSA 등 10개의 물리화학적 Feature를 추가하여 총 20개의 Meta Feature를 구성했습니다.
+  10개의 Base Model prediction에 LogP, MolWt, TPSA 등 10개의 물리화학적 Feature를 추가하여 총 20개의 Meta Feature를 구성했음.
 
 - **서로 다른 특성을 가진 두 Meta Model을 다시 결합했을 때 가장 낮은 OOF MAE를 기록했습니다.**  
-  LGBM L1 Meta Learner의 OOF MAE는 8.3807, Huber Regression은 8.4379였으며, 두 모델을 **7:3 비율로 결합한 최종 모델이 OOF MAE 8.3773**을 기록했습니다.
+  LGBM L1 Meta Learner의 OOF MAE는 8.3807, Huber Regression은 8.4379였으며, 두 모델을 **7:3 비율로 결합한 최종 모델이 OOF MAE 8.3773**을 기록했음.
 
-- 최종적으로 **Leaderboard MAE 8.5201**을 기록했으며, 복수의 분자 표현과 여러 단계의 Ensemble을 활용하는 것이 본 데이터에서 효과적인 접근임을 확인할 수 있었습니다.
+- 최종적으로 **Leaderboard MAE 8.5201**을 기록했으며, 복수의 분자 표현과 여러 단계의 Ensemble을 활용하는 것이 본 데이터에서 효과적인 접근임을 확인할 수 있었음.
+
+## 📝 심사 피드백 및 프로젝트 회고
+
+심사 과정에서는 모델의 성능뿐 아니라, **hERG라는 예측 Target에 대한 도메인 이해와 이를 모델링에 반영하는 과정의 중요성**이 강조되었음.
+
+### 긍정적으로 평가받은 부분
+
+- Target의 음수값을 단순한 노이즈로 간주하여 임의로 제거하지 않고 원본 값을 유지했음.
+- 분자의 구조적 특성을 활용한 모델링 접근은 긍정적인 평가를 받았음.
+- 다양한 모델링 실험과 시행착오를 통해 최종 성능을 개선해 나갔음.
+
+### 주요 심사 피드백
+
+심사위원은 문제에서 **hERG channel**을 명시한 만큼, 관련 선행 연구와 hERG 채널의 구조적 특성을 조사하고 이를 모델링에 반영하는 접근을 기대했다고 설명했음.
+
+그러나 상위 1·2·3위 팀의 코드와 발표 자료에서도 이러한 **hERG 특화 도메인 정보가 모델링에 충분히 반영되지 않은 점**을 공통적인 아쉬움으로 언급했음.
+
+우리 팀 역시 분자 구조 정보를 활용한 모델링은 수행했지만, **hERG라는 특정 Target의 생물학적·구조적 특성을 Feature Engineering이나 모델 설계에 직접적으로 연결하는 부분은 부족했음.**
+
+또한 하나의 특성이나 한쪽 관점에 지나치게 집중하기보다, 여러 요소 사이의 **상호작용(Interaction)**을 함께 고려해야 한다는 피드백도 있었습니다. 즉 개별 Feature나 모델의 성능만 보는 것이 아니라, Target과 분자 구조 및 물리화학적 특성의 관계를 보다 전체적인 관점에서 바라볼 필요가 있었음.
+
+### 배운 점
+
+이번 프로젝트를 통해 AI를 활용하면 모델 학습과 Ensemble 파이프라인을 빠르게 구축할 수 있지만, **문제의 도메인 자체를 이해하고 어떤 정보를 모델에 반영할 것인지는 직접 고민해야 한다는 점**을 배웠음.
+
+특히 신약 개발과 같은 분야에서는 단순히 예측 성능을 높이는 것뿐 아니라,
+
+- 어떤 Target을 예측하는지
+- 해당 Target이 어떤 구조와 특성을 가지는지
+- 어떤 분자 특성이 Target과 상호작용할 가능성이 있는지
+
+를 함께 이해하는 과정이 중요하다는 점을 확인했음.
+
+### 향후 개선 방향
+
+향후 같은 문제를 다시 해결한다면 다음과 같은 분석을 모델링 이전 단계에서 추가하고자 함.
+
+- hERG channel의 구조 및 작동 기전에 대한 선행 연구 조사
+- 알려진 hERG blocker의 공통적인 분자 구조 및 물리화학적 특성 분석
+- hERG inhibition과 관련된 구조적 Feature 탐색
+- 도메인 지식을 반영한 Feature Engineering
+- 분자 구조와 물리화학적 Feature 사이의 Interaction 분석
+- 개별 모델 성능뿐 아니라 다양한 분자 표현을 종합적으로 고려한 모델 설계
+
+이를 통해 단순히 성능이 좋은 모델을 조합하는 것을 넘어, **hERG inhibition이라는 문제 자체의 특성을 반영한 모델링**으로 발전시킬 수 있을 것으로 생각함.
