@@ -259,3 +259,209 @@ RDKit Descriptor 중 차이가 상대적으로 크게 나타난 변수는
 
 7. **Train/Test의 개별 feature 분포는 전반적으로 유사했지만 일부 차이가 존재했다.**
    - 따라서 단순 학습 성능보다는 CV 및 OOF 기반 일반화 성능 확인이 중요했음.
+
+그렇게 하는 게 더 좋아. **기억이 불확실한 내용을 억지로 “Validation 전략”, “모델 선정 이유”처럼 쓰지 말고, 네가 실제로 남겨둔 `최종 Submission 설명서`에서 확인되는 내용만 쓰자.**
+
+그러면 EDA 다음부터는 이렇게 구성하면 돼.
+
+```text
+EDA
+ ↓
+최종 모델 구성
+ ↓
+Base Model 10개
+ ↓
+Meta Feature 구성
+ ↓
+LGBM / Huber Stacking
+ ↓
+7:3 Final Blend
+ ↓
+최종 성능
+```
+
+즉 `모델링 설계 방향`, `Validation Strategy`는 **아예 없어도 된다.**
+
+README에는 아래 정도면 충분해.
+
+## 🤖 모델링 및 실험
+
+### 1. 최종 모델 구성
+
+최종 제출 모델은 여러 Base Model의 예측값을 다시 Meta Model에 입력하는
+**Stacking Ensemble** 구조로 구성했습니다.
+
+최종 Meta Model의 입력에는
+
+- **10개의 Base Model prediction**
+- **10개의 물리화학적 Feature**
+
+를 사용했습니다.
+
+전체 구조는 다음과 같습니다.
+
+```text
+10 Base Model Predictions
+          +
+10 Physicochemical Features
+          ↓
+ ┌────────┴─────────┐
+ ↓                  ↓
+LGBM L1            Huber
+Meta Learner       Regression
+OOF 8.3807         OOF 8.4379
+ └────────┬─────────┘
+          ↓
+0.7 × LGBM + 0.3 × Huber
+          ↓
+    OOF MAE 8.3773
+    LB MAE  8.5201
+```
+
+---
+
+### 2. Base Models
+
+최종 Stacking에는 총 **10개의 Base Model prediction**을 사용했습니다.
+
+| Base Model | OOF MAE |
+|---|---:|
+| `chemprop_bag_all` | **8.6065** |
+| `team1_pseudo_v3` | **8.7940** |
+| `chemprop_dmpnn` | **8.8321** |
+| `team1_bag` | **8.8654** |
+| `lgbm_descriptor_plus_bag` | 9.1281 |
+| `lgbm_descriptor_plus` | 9.1652 |
+| `dplus_L1_full` | 9.1711 |
+| `dplus_MSE_full` | 9.3104 |
+| `lgbm_fingerprint` | 9.3574 |
+| `chemberta_v3` | 9.4748 |
+
+최종 Ensemble에는 Chemprop 계열, LightGBM 계열,
+Fingerprint 기반 모델, ChemBERTa 기반 모델 등
+서로 다른 형태의 Base Model prediction이 포함되었습니다.
+
+---
+
+### 3. Meta Feature 구성
+
+10개의 Base Model prediction에
+다음 **10개의 물리화학적 Feature**를 추가하여 Meta Model의 입력으로 사용했습니다.
+
+| Feature | 의미 |
+|---|---|
+| `LogP` | 지용성 |
+| `MolWt` | 분자량 |
+| `TPSA` | 위상학적 극성 표면적 |
+| `HBD` | Hydrogen Bond Donor 수 |
+| `HBA` | Hydrogen Bond Acceptor 수 |
+| `Rotatable Bonds` | 회전 가능한 결합 수 |
+| `Aromatic Rings` | 방향족 고리 수 |
+| `fr_aniline` | Aniline 구조 관련 Descriptor |
+| `fr_piperdine` | Piperidine 구조 관련 Descriptor |
+| `fr_pyridine` | Pyridine 구조 관련 Descriptor |
+
+따라서 최종 Meta Model은 총 **20개의 입력 Feature**를 사용했습니다.
+
+```text
+10 Base Predictions
+       +
+10 Physicochemical Features
+       ↓
+20 Meta Features
+```
+
+---
+
+### 4. LGBM Meta Learner
+
+첫 번째 Meta Model로 **LightGBM의 L1 Regression**을 사용했습니다.
+
+10개의 Base prediction과 10개의 물리화학적 Feature를 입력으로 받아
+최종 Target을 예측하도록 학습했습니다.
+
+**OOF MAE: 8.3807**
+
+---
+
+### 5. Huber Meta Learner
+
+두 번째 Meta Model로 **Huber Regression**을 사용했습니다.
+
+LGBM Meta Model과 동일하게
+
+- 10개 Base Model prediction
+- 10개 물리화학적 Feature
+
+를 입력으로 사용했습니다.
+
+**OOF MAE: 8.4379**
+
+---
+
+### 6. Final Blend
+
+두 Meta Model의 prediction을 최종적으로 다시 결합했습니다.
+
+\[
+Prediction_{final}
+=
+0.7 \times Prediction_{LGBM}
++
+0.3 \times Prediction_{Huber}
+\]
+
+즉,
+
+- **LGBM Meta Learner: 70%**
+- **Huber Regression: 30%**
+
+의 비율로 Ensemble했습니다.
+
+| Model | OOF MAE |
+|---|---:|
+| LGBM Meta Learner | 8.3807 |
+| Huber Regression | 8.4379 |
+| **Final Blend** | **8.3773** |
+
+최종 Leaderboard MAE는 **8.5201**을 기록했습니다.
+
+> **Final OOF MAE: 8.3773**  
+> **Final Leaderboard MAE: 8.5201**
+
+이 버전의 장점은 **모르는 걸 거의 안 썼다는 것**이야.
+
+특히 이전에 내가 작성했던 것 중에서는 지금 단계에서는 이런 내용은 빼는 게 안전해:
+
+- Chemprop `depth=5`, `hidden=400` 같은 상세 hyperparameter
+- 정확히 `5 × 2 × 5 = 50개`를 어떻게 학습했는지
+- Scaffold CV를 최종 전체 모델에서 어떻게 적용했는지
+- Pseudo-label weight가 정확히 `0.5`였는지
+- Full-data retraining 방식
+- 왜 7:3을 선택했는지에 대한 해석
+- “모델 diversity를 의도적으로 최우선으로 고려했다” 같은 모델링 철학
+- 특정 모델이 왜 들어갔는지에 대한 추측
+
+**최종 Submission 설명서에서 확실히 확인되는 내용만으로 포트폴리오를 만드는 거라면 위 글 정도가 가장 안전해.**
+
+그리고 이것만으로도 약하지 않아. 오히려 채용 담당자 입장에서는
+
+> **10개 Base prediction → 20개 Meta Feature → LGBM/Huber → 7:3 Blend → LB 8.5201**
+
+이라는 최종 구조가 명확하게 보이기 때문에 충분히 모델링 프로젝트처럼 보여.
+
+## 💡 주요 시사점
+
+- **단일 모델보다 Stacking Ensemble에서 더 높은 성능을 확인했습니다.**  
+  가장 좋은 Base Model인 `chemprop_bag_all`의 OOF MAE는 8.6065였지만, 여러 Base Model의 예측값을 결합한 최종 Stacking Ensemble은 **OOF MAE 8.3773**까지 개선되었습니다.
+
+- **서로 다른 분자 표현을 사용하는 모델의 예측값을 하나의 Meta Model에서 결합할 수 있었습니다.**  
+  최종 모델에는 Chemprop, LightGBM, Morgan Fingerprint, ChemBERTa 등 서로 다른 입력 표현과 모델 구조에서 생성된 예측값이 함께 사용되었습니다.
+
+- **Base Model의 prediction뿐 아니라 물리화학적 특성을 Meta Feature로 함께 사용하는 구조가 활용되었습니다.**  
+  10개의 Base Model prediction에 LogP, MolWt, TPSA 등 10개의 물리화학적 Feature를 추가하여 총 20개의 Meta Feature를 구성했습니다.
+
+- **서로 다른 특성을 가진 두 Meta Model을 다시 결합했을 때 가장 낮은 OOF MAE를 기록했습니다.**  
+  LGBM L1 Meta Learner의 OOF MAE는 8.3807, Huber Regression은 8.4379였으며, 두 모델을 **7:3 비율로 결합한 최종 모델이 OOF MAE 8.3773**을 기록했습니다.
+
+- 최종적으로 **Leaderboard MAE 8.5201**을 기록했으며, 복수의 분자 표현과 여러 단계의 Ensemble을 활용하는 것이 본 데이터에서 효과적인 접근임을 확인할 수 있었습니다.
